@@ -15,6 +15,38 @@ package com.tdsecurities.test
   */
 
 
-object TradeStreamScala {
-  def orderTrades(tradesStream: String*): Seq[String] = ???
+object TradeStreamScala  {
+
+  sealed trait Order {
+    val raw: String
+  }
+  sealed trait BuySellOrder extends Order{
+    val orderNumber: String
+  }
+  final case class Cash(code: String, serial: String, override val raw: String) extends Order
+  final case class Sell(override val orderNumber: String, override val raw: String) extends BuySellOrder
+  final case class Buy(override val orderNumber: String, override val raw: String) extends BuySellOrder
+
+  val ordering: Ordering[Order] = Ordering.by {
+    case o: Sell => (1, o.orderNumber, 1)
+    case o: Buy => (1,  o.orderNumber, 2)
+    case o: Cash => (3,  "", 1)
+  }
+
+    def orderTrades(tradesStream: String*): Seq[String] = {
+      tradesStream
+        .map(parse)
+        .sorted(ordering)
+        .map(_.raw)
+  }
+
+  def parse(st: String):Order = {
+    val split =     st.split(" ")
+    (split(0),split(1)) match  {
+      case (on,"BUY") =>Buy(on,st)
+      case (on,"SELL") =>Sell(on,st)
+      case (code,serial) =>Cash(code,serial,st)
+    }
+  }
+
 }
