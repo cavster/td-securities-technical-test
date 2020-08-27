@@ -30,7 +30,7 @@ object TradeStreamScala  {
   val ordering: Ordering[Order] = Ordering.by {
     case o: Sell => (1, o.orderNumber, 1)
     case o: Buy => (1,  o.orderNumber, 2)
-    case o: Cash => (3,  "", 1)
+    case _: Cash => (2,  "", 1)
   }
 
     def orderTrades(tradesStream: String*): Seq[String] = {
@@ -40,12 +40,12 @@ object TradeStreamScala  {
         .map(_.raw)
   }
 
-  def parse(st: String):Order = {
-    val split =     st.split(" ")
+  def parse(tradesString: String):Order = {
+    val split =     tradesString.split(" ")
     (split(0),split(1)) match  {
-      case (on,"BUY") =>Buy(on,st)
-      case (on,"SELL") =>Sell(on,st)
-      case (code,serial) =>Cash(code,serial,st)
+      case (on,"BUY") =>Buy(on,tradesString)
+      case (on,"SELL") =>Sell(on,tradesString)
+      case (code,serial) =>Cash(code,serial,tradesString)
     }
   }
 

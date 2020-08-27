@@ -27,6 +27,21 @@ class TradeStreamScalaUnitTest extends FlatSpec with Matchers {
 
     actual shouldBe expected
   }
+  it should "order trade codes lexicographically" in {
+    val input = Seq("11C BUY",
+      "11C SELL",
+      "11 BUY",
+      "11 SELL")
+    val actual: Seq[String] = TradeStreamScala.orderTrades(input: _*)
+    val expected = List(
+      "11 SELL",
+      "11 BUY",
+      "11C SELL",
+      "11C BUY"
+    )
+    actual shouldBe expected
+  }
+
 
   it should "order trade codes (2)" in {
     val input = Seq(
